@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { MapPin, Thermometer, Calendar, Bell, AlertTriangle, Mail, Phone, Search, Settings, X } from 'lucide-react';
 
+// Configuration constants
+const ACCUWEATHER_API_KEY = 'DmENIBqYeAKupCz3VQAwbVJvol8kzLHE';
+const ALERT_CHECK_INTERVAL = 300000; // 5 minutes
+const DEFAULT_TEMPERATURE_THRESHOLD = 35;
+
 const EuropeWeatherApp = () => {
   const [activeTab, setActiveTab] = useState('current');
   const [selectedLocation, setSelectedLocation] = useState('');
@@ -11,12 +16,12 @@ const EuropeWeatherApp = () => {
   const [alertSettings, setAlertSettings] = useState({
     email: '',
     phone: '',
-    temperatureThreshold: 35,
+    temperatureThreshold: DEFAULT_TEMPERATURE_THRESHOLD,
     cities: []
   });
   const [showAlertSetup, setShowAlertSetup] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [apiKey, setApiKey] = useState('');
+  const [apiKey, setApiKey] = useState(ACCUWEATHER_API_KEY);
   const [showApiSetup, setShowApiSetup] = useState(false);
   const [heatMapData, setHeatMapData] = useState([]);
   const [selectedLocationKey, setSelectedLocationKey] = useState('');
@@ -259,7 +264,7 @@ const EuropeWeatherApp = () => {
       setAlertSettings({
         email: '',
         phone: '',
-        temperatureThreshold: 35,
+        temperatureThreshold: DEFAULT_TEMPERATURE_THRESHOLD,
         cities: []
       });
     }
@@ -323,7 +328,7 @@ const EuropeWeatherApp = () => {
         console.log('Heat wave alerts triggered:', triggered);
         // In a real app, you'd send actual notifications here
       }
-    }, 300000); // 5 minutes
+    }, ALERT_CHECK_INTERVAL);
 
     return () => clearInterval(interval);
   }, [alerts, currentWeather, heatMapData]);
@@ -702,3 +707,80 @@ const EuropeWeatherApp = () => {
                 <div className="flex space-x-3">
                   <button
                     onClick={() => setShowAlertSetup(false)}
+                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={addAlert}
+                    disabled={!selectedLocation || !alertSettings.email}
+                    className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50"
+                  >
+                    Save Alert
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* API Key Setup Modal */}
+        {showApiSetup && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold">Configure API Key</h3>
+                <button
+                  onClick={() => setShowApiSetup(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">AccuWeather API Key</label>
+                  <input
+                    type="text"
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                    className="w-full px-3 py-2 border rounded-lg"
+                    placeholder="Enter your AccuWeather API key"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Get your free API key from{' '}
+                    <a 
+                      href="https://developer.accuweather.com/" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-800 underline"
+                    >
+                      AccuWeather Developer Portal
+                    </a>
+                  </p>
+                </div>
+                <div className="flex space-x-3">
+                  <button
+                    onClick={() => setShowApiSetup(false)}
+                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={saveApiKey}
+                    disabled={!apiKey.trim()}
+                    className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50"
+                  >
+                    Save API Key
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default EuropeWeatherApp;
